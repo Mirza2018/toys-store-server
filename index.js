@@ -84,7 +84,6 @@ async function run() {
             const result = await toysCollection.findOne(filter)
 
             res.send(result)
-
         })
         app.delete('/toys/:id', async (req, res) => {
             const id = req.params.id;
@@ -110,11 +109,15 @@ async function run() {
 
 
         app.get('/mytoys', async (req, res) => {
-            const result = await toysBuyCollection.find().toArray()
+            let query = {}
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await toysBuyCollection.find(query).toArray()
             res.send(result)
         })
 
-        
+
         app.delete('/mytoys/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
