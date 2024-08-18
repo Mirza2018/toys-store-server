@@ -26,14 +26,14 @@ const client = new MongoClient(uri, {
 });
 
 const verifyJWT = (req, res, next) => {
-    console.log("hitting verify JWT");
-    console.log(req.headers.authorization);
+    // console.log("hitting verify JWT");
+    // console.log(req.headers.authorization);
     const authorization = req.headers.authorization;
     if (!authorization) {
         return res.status(401).send({ error: true, message: "unauthorized access" })
     }
     const token = authorization.split(' ')[1];
-    console.log('token varifyed', token);
+    // console.log('token varifyed', token);
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
         if (error) {
             return res.status(403).send({ error: true, message: "unauthorized access" })
@@ -55,14 +55,20 @@ async function run() {
         //jwt
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            console.log(user);
+            // console.log(user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             res.send({ token });
         })
 
 
+        app.get('/toy', async (req, res) => {
+            const result = await toysCollection.find().toArray()
+            // console.log(result)
+            res.send(result)
 
-        app.get('/toys',verifyJWT, async (req, res) => {
+        })
+
+        app.get('/toys', verifyJWT, async (req, res) => {
             let query = {}
             if (req.query?.email) {
                 query = { email: req.query.email }
@@ -84,7 +90,7 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const toy = req.body;
-            console.log(toy, "obhrfjii");
+            // console.log(toy, "obhrfjii");
             const objects = {
                 $set: {
                     name: toy.name,
@@ -98,7 +104,7 @@ async function run() {
                     seller: toy.seller,
                 }
             }
-            console.log(objects, "obhrfjii");
+            // console.log(objects, "obhrfjii");
             const options = { upsert: true }
             const result = await toysCollection.updateOne(filter, objects, options)
             res.send(result)
@@ -108,7 +114,7 @@ async function run() {
 
         app.get('/toys/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const filter = { _id: new ObjectId(id) }
             const result = await toysCollection.findOne(filter)
 
@@ -129,7 +135,7 @@ async function run() {
 
         app.post('/buy', async (req, res) => {
             const toy = req.body;
-            console.log(toy);
+            // console.log(toy);
             const result = await toysBuyCollection.insertOne(toy)
             res.send(result)
 
@@ -137,7 +143,7 @@ async function run() {
 
 
 
-        app.get('/mytoys',verifyJWT, async (req, res) => {
+        app.get('/mytoys', verifyJWT, async (req, res) => {
             let query = {}
             if (req.query?.email) {
                 query = { email: req.query.email }
